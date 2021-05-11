@@ -7,6 +7,4 @@ COPY index.js ./
 
 RUN npm install
 
-EXPOSE 5003
-
 CMD node index.js

@@ -6,10 +6,11 @@ services:
         image: api-gateway
         ports:
             - 8080:8080
-        links:
+        depends_on:
             - users-service
             - movies-service
-            - microservice3
+        networks: 
+            - front-network
         command: java -jar /app.jar
 
     users-service:
@@ -17,6 +18,12 @@ services:
         image: users-service
         ports:
             - 5001:5001
+        restart: on-failure
+        depends_on: 
+            - rabbitmq
+        networks: 
+            - front-network
+            - back-network
         command: node index.js
         
     movies-service:
@@ -24,11 +31,33 @@ services:
         image: movies-service
         ports:
             - 5002:5002
+        networks: 
+            - front-network
         command: node index.js
         
-    microservice3:
-        build: ./service-3
-        image: microservice3
-        ports:
-            - 5003:5003
+    email-service:
+        build: ./email-service
+        image: email-service
+        restart: on-failure
+        depends_on: 
+            - rabbitmq
+        networks: 
+            - back-network
         command: node index.js
+
+    rabbitmq:
+        image: rabbitmq:3-management
+        ports:
+            - 5672:5672
+            - 15672:15672
+        networks: 
+            - back-network
+        healthcheck:
+            test: [ "CMD", "nc", "-z", "localhost", "5672" ]
+            interval: 5s
+            timeout: 15s
+            retries: 1
+
+networks:
+    front-network:
+    back-network:
