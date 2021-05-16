@@ -3,20 +3,17 @@ package ga.davidcm.gateway;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
-import org.springframework.cloud.gateway.filter.ratelimit.RateLimiter;
 import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
-import org.springframework.stereotype.Component;
-import reactor.core.publisher.Flux;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.core.userdetails.MapReactiveUserDetailsService;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
-
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 @SpringBootApplication
 public class GatewayApplication {
@@ -28,14 +25,45 @@ public class GatewayApplication {
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder){
         return builder.routes()
-                .route("microservice1", r -> r.path("/users/**").uri("http://users-service:5001/"))
-                .route("microservice2", r -> r.path("/movies/**").uri("http://movies-service:5002/"))
-                .route("microservice3", r -> r.path("/micro3/**").uri("http://microservice3:5003/"))
+                .route("users-service", r -> r.path("/users/**").uri("http://localhost:5001/"))
+                .route("movies-service", r -> r
+                        .path("/movies/**")
+                        .filters(f -> f.requestRateLimiter(conf -> {
+                            conf.setRateLimiter(redisRateLimiter());
+                            //conf.setKeyResolver(exchange -> Mono.just("1"));
+                        }))
+                        .uri("http://localhost:5002/")
+                )
+                .build();
+
+    }
+
+    @Bean
+    RedisRateLimiter redisRateLimiter(){
+        //max request per second
+        //max capacity per second
+        return new RedisRateLimiter(10,20);
+    }
+
+    @Bean
+    SecurityWebFilterChain springWebFilterChain(ServerHttpSecurity http) throws Exception {
+        return http.httpBasic().and()
+                .csrf().disable()
+                .authorizeExchange()
+                .pathMatchers("/users/**").permitAll()
+                .pathMatchers("/**").authenticated()
+                .anyExchange().permitAll()
+                .and()
                 .build();
     }
 
+    @Bean
+    public MapReactiveUserDetailsService reactiveUserDetailsService() {
+        //TEST ONLY
+        UserDetails user = User.withDefaultPasswordEncoder().username("user").password("password").roles("USER").build();
 
-
+        return new MapReactiveUserDetailsService(user);
+    }
 
 
     //https://spring.io/projects/spring-cloud-gateway#overview

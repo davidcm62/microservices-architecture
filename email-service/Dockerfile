@@ -1,10 +1,9 @@
-FROM node:16-alpine3.11
+FROM python:3-alpine
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
-COPY index.js ./
+COPY service.py ./
 
-RUN npm install
+RUN pip install pika
 
-CMD node index.js
+CMD python service.py

@@ -5,6 +5,8 @@ app.use(express.json());
 
 app.post('/movies',(req,res)=>{
     
+    console.log(req.headers);
+
     res.json({
         hello: "Microservice 2 😄",
         body: req.body

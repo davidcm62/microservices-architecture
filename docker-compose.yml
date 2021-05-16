@@ -61,3 +61,5 @@ services:
 networks:
     front-network:
     back-network:
+
+# docker run -d -p 6379:6379 redis:6.2.3-alpine
