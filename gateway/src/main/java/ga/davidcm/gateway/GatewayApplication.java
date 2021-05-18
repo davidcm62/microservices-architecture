@@ -2,16 +2,14 @@ package ga.davidcm.gateway;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
-import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
+import org.springframework.cloud.gateway.filter.GatewayFilter;
+import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.core.userdetails.MapReactiveUserDetailsService;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -29,7 +27,7 @@ public class GatewayApplication {
                 .route("movies-service", r -> r
                         .path("/movies/**")
                         .filters(f -> f.requestRateLimiter(conf -> {
-                            conf.setRateLimiter(redisRateLimiter());
+                            //conf.setRateLimiter(redisRateLimiter());
                             //conf.setKeyResolver(exchange -> Mono.just("1"));
                         }))
                         .uri("http://localhost:5002/")
@@ -38,14 +36,14 @@ public class GatewayApplication {
 
     }
 
-    @Bean
+    /*@Bean
     RedisRateLimiter redisRateLimiter(){
         //max request per second
         //max capacity per second
         return new RedisRateLimiter(10,20);
-    }
+    }*/
 
-    @Bean
+    /*@Bean
     SecurityWebFilterChain springWebFilterChain(ServerHttpSecurity http) throws Exception {
         return http.httpBasic().and()
                 .csrf().disable()
@@ -63,7 +61,7 @@ public class GatewayApplication {
         UserDetails user = User.withDefaultPasswordEncoder().username("user").password("password").roles("USER").build();
 
         return new MapReactiveUserDetailsService(user);
-    }
+    }*/
 
 
     //https://spring.io/projects/spring-cloud-gateway#overview
