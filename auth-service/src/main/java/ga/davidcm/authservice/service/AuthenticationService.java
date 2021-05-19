@@ -39,8 +39,7 @@ public class AuthenticationService {
         if (authOk.isEmpty()) throw new UnauthorizedException();
 
         Auth auth = authOk.get();
-
-        return Jwts.builder()
+        String token = Jwts.builder()
                 .setSubject(auth.getUsername())
                 .setIssuedAt(new Date(now))
                 .setExpiration(new Date(now + TOKEN_DURATION))
@@ -48,5 +47,7 @@ public class AuthenticationService {
                 .claim("userId", auth.getId())
                 .signWith(Keys.hmacShaKeyFor(TOKEN_SIGN_KEY.getBytes()), SignatureAlgorithm.HS512)
                 .compact();
+
+        return String.format("Bearer %s",token);
     }
 }
