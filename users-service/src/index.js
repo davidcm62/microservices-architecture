@@ -6,10 +6,9 @@ const { v4: uuidv4 } = require("uuid");
 const jwt = require("jsonwebtoken");
 
 const UserRepository = require("./database");
+const publishEventToRabbit = require("./rabbitmq");
 
 const PORT = process.env.PORT || 5001;
-const USER_CREATED_EXCHANGE = process.env.USER_CREATED_EXCHANGE || "USER_CREATED_EXCHANGE";
-const RABBITMQ_HOST = process.env.RABBITMQ_HOST || "rabbitmq";
 
 const app = express();
 app.use(express.json());
@@ -42,7 +41,6 @@ const checkToken = async (req, res, next) => {
         next();
     });
 };
-
 app.all("*", checkToken);
 
 app.post(
@@ -74,7 +72,7 @@ app.post(
             return res.status(409).json();
         }
 
-        //TODO: publish event
+        publishEventToRabbit(user);
 
         delete user.password;
         res.status(201).json(user);
