@@ -50,4 +50,8 @@ public class AuthenticationService {
 
         return String.format("Bearer %s",token);
     }
+
+    public void save(String id, String username, String password){
+        this.authRepository.save(new Auth().setId(id).setUsername(username).setPassword(SHA256.hash(password)));
+    }
 }

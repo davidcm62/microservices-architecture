@@ -23,15 +23,16 @@ public class GatewayApplication {
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder){
         return builder.routes()
+                .route("auth-service", r -> r.path("/login").uri("http://localhost:5000/login"))
                 .route("users-service", r -> r.path("/users/**").uri("http://localhost:5001/"))
-                .route("movies-service", r -> r
+                /*.route("movies-service", r -> r
                         .path("/movies/**")
                         .filters(f -> f.requestRateLimiter(conf -> {
                             //conf.setRateLimiter(redisRateLimiter());
                             //conf.setKeyResolver(exchange -> Mono.just("1"));
                         }))
                         .uri("http://localhost:5002/")
-                )
+                )*/
                 .build();
 
     }
@@ -41,26 +42,6 @@ public class GatewayApplication {
         //max request per second
         //max capacity per second
         return new RedisRateLimiter(10,20);
-    }*/
-
-    /*@Bean
-    SecurityWebFilterChain springWebFilterChain(ServerHttpSecurity http) throws Exception {
-        return http.httpBasic().and()
-                .csrf().disable()
-                .authorizeExchange()
-                .pathMatchers("/users/**").permitAll()
-                .pathMatchers("/**").authenticated()
-                .anyExchange().permitAll()
-                .and()
-                .build();
-    }
-
-    @Bean
-    public MapReactiveUserDetailsService reactiveUserDetailsService() {
-        //TEST ONLY
-        UserDetails user = User.withDefaultPasswordEncoder().username("user").password("password").roles("USER").build();
-
-        return new MapReactiveUserDetailsService(user);
     }*/
 
 

@@ -72,7 +72,7 @@ app.post(
             return res.status(409).json();
         }
 
-        publishEventToRabbit(user);
+        await publishEventToRabbit(user);
 
         delete user.password;
         res.status(201).json(user);
