@@ -3,13 +3,12 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 
-app.post('/movies',(req,res)=>{
+app.get('/movies',(req,res)=>{
     
     console.log(req.headers);
 
     res.json({
-        hello: "Microservice 2 😄",
-        body: req.body
+        hello: "Microservice 2 😄"
     });
 });
 

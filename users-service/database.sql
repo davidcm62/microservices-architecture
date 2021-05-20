@@ -3,7 +3,7 @@ CREATE DATABASE users_service CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE users_service;
 
 CREATE TABLE users (
-	id				CHAR(32) 		NOT NULL,
+	id				CHAR(36) 		NOT NULL,
 	username		VARCHAR(50) 	NOT NULL UNIQUE,
 	email			VARCHAR(260)	NOT	NULL UNIQUE,
 	name			CHAR(200)		NOT NULL,

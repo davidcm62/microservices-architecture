@@ -9,8 +9,31 @@ services:
         depends_on:
             - users-service
             - movies-service
+            - auth-service
         networks: 
             - front-network
+        environment: 
+            - spring.redis.host=redis
+            - LOGIN_URL=http://auth-service:5000/login
+            - USERS_URL=http://users-service:5001/
+            - MOVIES_URL=http://movies-service:5002/
+        command: java -jar /app.jar
+    
+    auth-service:
+        build: ./auth-service
+        image: auth-service
+        ports: 
+            - 5000:5000
+        restart: on-failure
+        depends_on: 
+            - rabbitmq
+            - mysql-auth-service
+        networks: 
+            - back-network
+            - front-network
+        environment: 
+            - spring.datasource.url=jdbc:mysql://mysql-auth-service:3306/auth_service
+            - spring.rabbitmq.host=rabbitmq
         command: java -jar /app.jar
 
     users-service:
@@ -21,10 +44,14 @@ services:
         restart: on-failure
         depends_on: 
             - rabbitmq
+            - mysql-users-service
         networks: 
             - front-network
             - back-network
-        command: node index.js
+        environment: 
+            - RABBITMQ_URL=amqp://rabbitmq:5672
+            - DB_HOST=mysql-users-service
+        command: node src/index.js
         
     movies-service:
         build: ./movies-service
@@ -43,8 +70,9 @@ services:
             - rabbitmq
         networks: 
             - back-network
-        command: node index.js
+        command: python service.py
 
+    #RabbitMQ
     rabbitmq:
         image: rabbitmq:3-management
         ports:
@@ -58,8 +86,36 @@ services:
             timeout: 15s
             retries: 1
 
+    #databases
+    mysql-users-service:
+        image: mariadb:latest
+        environment:
+            - MYSQL_ROOT_PASSWORD=root
+        volumes: 
+            - ./users-service/database.sql:/docker-entrypoint-initdb.d/0_init.sql
+        ports: 
+            - 3306:3306
+        networks: 
+            - back-network
+
+    mysql-auth-service:
+        image: mariadb:latest
+        environment:
+            - MYSQL_ROOT_PASSWORD=root
+        volumes: 
+            - ./auth-service/database.sql:/docker-entrypoint-initdb.d/0_init.sql
+        ports: 
+            - 3307:3306
+        networks: 
+            - back-network
+
+    redis:
+        image: redis:6.2.3-alpine
+        ports: 
+            - 6379:6379
+        networks: 
+            - front-network
+
 networks:
     front-network:
     back-network:
-
-# docker run -d -p 6379:6379 redis:6.2.3-alpine

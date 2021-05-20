@@ -1,13 +1,13 @@
 import pika
 import json
 
-HOST = "localhost"
+HOST = "rabbitmq"
 EXCHANGE = "USER_CREATED_EXCHANGE"
 
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(host=HOST))
 channel = connection.channel()
-channel.exchange_declare(exchange=EXCHANGE, exchange_type='fanout')
+channel.exchange_declare(exchange=EXCHANGE, exchange_type='fanout', durable=True)
 
 result = channel.queue_declare(queue='', exclusive=True)
 queue_name = result.method.queue

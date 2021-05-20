@@ -3,10 +3,11 @@ FROM node:16-alpine3.11
 WORKDIR /usr/src/app
 
 COPY package*.json ./
-COPY index.js ./
+COPY .env ./
+COPY src ./src
 
 RUN npm install
 
 EXPOSE 5001
 
-CMD node index.js
+CMD node ./src/index.js
