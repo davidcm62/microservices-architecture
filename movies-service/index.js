@@ -7,9 +7,7 @@ app.get('/movies',(req,res)=>{
     
     console.log(req.headers);
 
-    res.json({
-        hello: "Microservice 2 😄"
-    });
+    res.sendStatus(501);
 });
 
 
